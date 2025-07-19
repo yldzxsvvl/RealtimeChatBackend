@@ -27,7 +27,7 @@ Proje, modern .NET teknolojileri kullanılarak, temiz kod ve sağlam mimari pren
 Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin:
 
 ```bash
-# Depoyu Klonlayın
+# Depoyu Kopyalayın
 git clone https://github.com/yldzxsvvl/RealtimeChatBackend.git
 
 # Proje Dizinine Gidin
