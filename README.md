@@ -32,7 +32,7 @@ git clone https://github.com/yldzxsvvl/RealtimeChatBackend.git
 
 # Proje Dizinine Gidin
 cd YeniChatProjesi
-# Not: Eğer klonladığınız klasörün adı farklıysa, o klasörün içine girin.
+# Not: Eğer kopyaladığınız klasörün adı farklıysa o klasörün içine girin.
 
 # Gerekli Paketleri Yükleyin
 dotnet restore
