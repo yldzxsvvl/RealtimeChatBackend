@@ -1,0 +1,39 @@
+# Bu dosyanın adı: .github/workflows/main.yml
+
+name: .NET CI/CD Pipeline
+
+# Bu iş akışının ne zaman çalışacağını belirler.
+# 'main' branch'ine her 'push' yapıldığında tetiklenir.
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    # İş akışının çalışacağı sanal makineyi belirler.
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Adım: Kodu Sanal Makineye İndir
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Adım: .NET 8 SDK'sını Kur
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    # 3. Adım: Gerekli Paketleri Yükle (Restore)
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # 4. Adım: Projeyi Derle (Build)
+    - name: Build
+      run: dotnet build --no-restore
+
+    # 5. Adım: Testleri Çalıştır (Test)
+    - name: Test
+      run: dotnet test --no-build --verbosity normal

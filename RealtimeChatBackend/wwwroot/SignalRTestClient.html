@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR Chat Test İstemcisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFF8E1; /* Çok açık, soft sarımsı krem */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .chat-container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(255, 230, 150, 0.4); /* Soft sarı tonlarında gölge */
+            width: 95%;
+            max-width: 700px; /* Biraz daha geniş */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 30px;
+            border: 1px solid #FFD54F; /* Soft sarı kenarlık */
+        }
+        .message-list {
+            height: 450px;
+            overflow-y: auto;
+            border: 1px solid #FFD54F; /* Soft sarı kenarlık */
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+            background-color: #FFFDE7; /* Çok çok açık sarımsı krem */
+            display: flex;
+            flex-direction: column;
+        }
+        .message-item {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            max-width: 90%;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .my-message {
+            background-color: #FFF9C4; /* Açık limon sarısı */
+            align-self: flex-end;
+            margin-left: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .other-message {
+            background-color: #F5F5DC; /* Açık bej (krem tonu) */
+            align-self: flex-start;
+            margin-right: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px; /* Alt boşluk ekle */
+        }
+        input[type="text"], input[type="password"], select {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: 1px solid #FFD54F;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        input[type="text"]:focus, input[type="password"]:focus, select:focus {
+            border-color: #FFB300;
+            box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.3);
+            outline: none;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .file-upload-label {
+            padding: 12px 16px;
+            background-color: #FFEB3B;
+            color: #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .file-upload-label:hover {
+            background-color: #FFC107;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        }
+        button {
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #FFCC80;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #FFA726;
+        }
+        .btn-secondary {
+            background-color: #B0BEC5;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #78909C;
+        }
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .status-success {
+            background-color: #e6ffe6;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #ffe6e6;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .hidden {
+            display: none;
+        }
+        h2, h3 {
+            color: #FFB300;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23FFB300'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5em;
+        }
+        .file-info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            margin-left: 5px;
+            flex-shrink: 0;
+        }
+        .group-management {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .group-management input {
+            flex-grow: 1;
+            min-width: 150px;
+        }
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .search-input-group input {
+            flex-grow: 1;
+        }
+        .auth-toggle {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .auth-toggle button {
+            background: none;
+            border: none;
+            color: #FFA726; /* Primary rengi */
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0;
+            box-shadow: none;
+            transform: none;
+        }
+        .auth-toggle button:hover {
+            color: #FFB300;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2 class="text-2xl font-bold mb-4 text-center">SignalR Chat Test</h2>
+
+        <!-- Kullanıcı Giriş/Kayıt Alanı -->
+        <div id="authSection" class="mb-6 p-5 border border-yellow-200 rounded-xl bg-yellow-50">
+            <h3 id="authTitle" class="text-xl font-semibold mb-3">Kullanıcı Girişi</h3>
+            
+            <!-- Kayıt Formu -->
+            <div id="registerForm" class="hidden">
+                <div class="mb-3">
+                    <input type="text" id="registerUsername" placeholder="Kullanıcı Adı" class="w-full">
+                </div>
+                <div class="mb-3">
+                    <input type="text" id="registerEmail" placeholder="E-posta" class="w-full">
+                </div>
+                <div class="mb-3">
+                    <input type="password" id="registerPassword" placeholder="Şifre" class="w-full">
+                </div>
+                <button id="registerButton" class="w-full btn-primary">Kaydol</button>
+            </div>
+
+            <!-- Giriş Formu -->
+            <div id="loginForm">
+                <div class="mb-3">
+                    <input type="text" id="loginEmail" placeholder="E-posta" class="w-full" value="testuser@example.com">
+                </div>
+                <div class="mb-3">
+                    <input type="password" id="loginPassword" placeholder="Şifre" class="w-full" value="password123">
+                </div>
+                <button id="loginButton" class="w-full btn-primary">Giriş Yap</button>
+            </div>
+
+            <p id="authStatus" class="status-message mt-3 hidden"></p>
+            <div class="auth-toggle">
+                <button id="toggleAuthMode">Hesabın yok mu? Kaydol</button>
+            </div>
+        </div>
+
+        <!-- Grup ve Mesaj Alanı -->
+        <div id="chatSection" class="hidden">
+            <h3 class="text-xl font-semibold mb-3">Grup Yönetimi</h3>
+            <div class="group-management">
+                <input type="text" id="newGroupName" placeholder="Yeni Grup Adı">
+                <input type="text" id="newGroupDescription" placeholder="Açıklama (Opsiyonel)">
+                <label class="flex items-center">
+                    <input type="checkbox" id="newGroupIsPublic" class="form-checkbox h-5 w-5 text-yellow-600 rounded-md mr-2">
+                    <span class="text-gray-700 text-sm">Herkese Açık</span>
+                </label>
+                <button id="createGroupButton" class="btn-primary">Grup Oluştur</button>
+            </div>
+
+            <div class="search-input-group">
+                <input type="text" id="publicGroupSearchTerm" placeholder="Herkese Açık Grup Ara...">
+                <button id="searchPublicGroupsButton" class="btn-secondary">Ara</button>
+            </div>
+            <div class="mb-4">
+                <select id="groupSelect" class="w-full">
+                    <option value="">Bir Grup Seçin</option>
+                </select>
+            </div>
+            <button id="joinSelectedGroupButton" class="btn-primary w-full mb-4 hidden">Seçili Gruba Katıl</button>
+            <button id="leaveSelectedGroupButton" class="btn-secondary w-full mb-4 hidden">Seçili Gruptan Ayrıl</button>
+
+
+            <h3 class="text-xl font-semibold mb-3">Mesajlaşma</h3>
+            <div class="search-input-group">
+                <input type="text" id="messageSearchTerm" placeholder="Mesajlarda Ara...">
+                <button id="searchMessagesButton" class="btn-secondary">Ara</button>
+            </div>
+
+            <div class="message-list" id="messagesList">
+                <!-- Mesajlar buraya gelecek -->
+            </div>
+
+            <div class="input-group">
+                <input type="file" id="fileInput" accept="image/*, .txt, .pdf, .doc, .docx" disabled>
+                <label for="fileInput" class="file-upload-label" id="fileUploadLabel">Dosya Seç</label>
+                <span id="selectedFileName" class="file-info"></span>
+                <input type="text" id="messageInput" placeholder="Mesajınızı buraya yazın..." disabled>
+                <button id="sendMessageButton" class="btn-primary" disabled>Gönder</button>
+            </div>
+            <p id="connectionStatus" class="status-message mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <!-- SignalR JavaScript istemci kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <script>
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginButton = document.getElementById('loginButton');
+        const authStatus = document.getElementById('authStatus');
+        const authSection = document.getElementById('authSection');
+        const chatSection = document.getElementById('chatSection');
+
+        // Yeni Kayıt Elementleri
+        const authTitle = document.getElementById('authTitle');
+        const registerForm = document.getElementById('registerForm');
+        const loginForm = document.getElementById('loginForm');
+        const toggleAuthModeButton = document.getElementById('toggleAuthMode');
+        const registerUsernameInput = document.getElementById('registerUsername');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const registerButton = document.getElementById('registerButton');
+
+
+        const newGroupNameInput = document.getElementById('newGroupName');
+        const newGroupDescriptionInput = document.getElementById('newGroupDescription');
+        const newGroupIsPublicCheckbox = document.getElementById('newGroupIsPublic');
+        const createGroupButton = document.getElementById('createGroupButton');
+
+        const publicGroupSearchTermInput = document.getElementById('publicGroupSearchTerm');
+        const searchPublicGroupsButton = document.getElementById('searchPublicGroupsButton');
+        const groupSelect = document.getElementById('groupSelect');
+        const joinSelectedGroupButton = document.getElementById('joinSelectedGroupButton');
+        const leaveSelectedGroupButton = document.getElementById('leaveSelectedGroupButton');
+
+        const messageSearchTermInput = document.getElementById('messageSearchTerm');
+        const searchMessagesButton = document.getElementById('searchMessagesButton');
+        const messagesList = document.getElementById('messagesList');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageButton = document.getElementById('sendMessageButton');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadLabel = document.getElementById('fileUploadLabel');
+        const selectedFileNameSpan = document.getElementById('selectedFileName');
+
+        let jwtToken = null;
+        let currentUserId = null;
+        let currentGroupId = null;
+        let connection = null;
+
+        function showStatus(element, message, type) {
+            element.textContent = message;
+            element.className = `status-message mt-3 ${type === 'success' ? 'status-success' : 'status-error'}`;
+            element.classList.remove('hidden');
+        }
+
+        // Auth modu değiştirme (Giriş/Kayıt)
+        toggleAuthModeButton.addEventListener('click', () => {
+            if (loginForm.classList.contains('hidden')) {
+                // Kayıt formundaysa, giriş formına geç
+                authTitle.textContent = 'Kullanıcı Girişi';
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                toggleAuthModeButton.textContent = 'Hesabın yok mu? Kaydol';
+            } else {
+                // Giriş formundaysa, kayıt formuna geç
+                authTitle.textContent = 'Yeni Hesap Oluştur';
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                toggleAuthModeButton.textContent = 'Zaten hesabın var mı? Giriş Yap';
+            }
+            authStatus.classList.add('hidden'); // Durum mesajını temizle
+        });
+
+
+        // Giriş yapma fonksiyonu
+        loginButton.addEventListener('click', async () => {
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+
+            if (!email || !password) {
+                showStatus(authStatus, 'E-posta ve şifre boş bırakılamaz.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5222/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    jwtToken = await response.text();
+                    showStatus(authStatus, 'Giriş başarılı!', 'success');
+                    authSection.classList.add('hidden');
+                    chatSection.classList.remove('hidden');
+                    
+                    try {
+                        const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+                        currentUserId = payload.nameid;
+                    } catch (e) {
+                        console.error("JWT payload çözümlenemedi:", e);
+                        showStatus(authStatus, 'Token çözümlenirken hata oluştu.', 'error');
+                        return;
+                    }
+
+                    await loadUserGroups();
+                    await startSignalRConnection();
+                } else {
+                    const errorText = await response.text();
+                    showStatus(authStatus, `Giriş başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Giriş hatası:', error);
+                showStatus(authStatus, 'Sunucuya bağlanılamadı veya bir hata oluştu.', 'error');
+            }
+        });
+
+        // Kaydolma fonksiyonu
+        registerButton.addEventListener('click', async () => {
+            const username = registerUsernameInput.value.trim();
+            const email = registerEmailInput.value.trim();
+            const password = registerPasswordInput.value.trim();
+
+            if (!username || !email || !password) {
+                showStatus(authStatus, 'Kullanıcı adı, e-posta ve şifre boş bırakılamaz.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5222/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                if (response.ok) {
+                    const token = await response.text(); // Kayıt da token döndürüyor
+                    showStatus(authStatus, 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.', 'success');
+                    // Kayıt başarılı olunca otomatik olarak giriş formuna geç
+                    toggleAuthModeButton.click(); 
+                    loginEmailInput.value = email; // E-postayı doldur
+                } else {
+                    const errorText = await response.text();
+                    showStatus(authStatus, `Kayıt başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Kayıt hatası:', error);
+                showStatus(authStatus, 'Sunucuya bağlanılamadı veya bir hata oluştu.', 'error');
+            }
+        });
+
+
+        // Kullanıcının gruplarını yükleme fonksiyonu
+        async function loadUserGroups() {
+            if (!jwtToken) return;
+
+            try {
+                const response = await fetch('http://localhost:5222/api/group/my-groups', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const groups = await response.json();
+                    groupSelect.innerHTML = '<option value="">Bir Grup Seçin</option>';
+                    groups.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.id;
+                        option.textContent = group.name + (group.creatorId === currentUserId ? " (Benim)" : "");
+                        groupSelect.appendChild(option);
+                    });
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Gruplar yüklenemedi: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Grupları yükleme hatası:', error);
+                showStatus(connectionStatus, 'Grupları yüklerken sunucu hatası.', 'error');
+            }
+        }
+
+        // Grup oluşturma fonksiyonu
+        createGroupButton.addEventListener('click', async () => {
+            const name = newGroupNameInput.value.trim();
+            const description = newGroupDescriptionInput.value.trim();
+            const isPublic = newGroupIsPublicCheckbox.checked;
+
+            if (!name) {
+                showStatus(connectionStatus, 'Grup adı boş olamaz.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5222/api/group/create', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description, isPublic })
+                });
+
+                if (response.ok) {
+                    const newGroup = await response.json();
+                    showStatus(connectionStatus, `Grup "${newGroup.name}" başarıyla oluşturuldu!`, 'success');
+                    newGroupNameInput.value = '';
+                    newGroupDescriptionInput.value = '';
+                    newGroupIsPublicCheckbox.checked = true;
+                    await loadUserGroups();
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Grup oluşturma başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Grup oluşturma hatası:', error);
+                showStatus(connectionStatus, 'Grup oluştururken sunucu hatası.', 'error');
+            }
+        });
+
+        // Herkese açık grup arama fonksiyonu
+        searchPublicGroupsButton.addEventListener('click', async () => {
+            const searchTerm = publicGroupSearchTermInput.value.trim();
+            try {
+                const response = await fetch(`http://localhost:5222/api/group/search-public?searchTerm=${encodeURIComponent(searchTerm)}&pageNumber=1&pageSize=10`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const groups = await response.json();
+                    groupSelect.innerHTML = '<option value="">Bir Grup Seçin</option>';
+                    groups.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.id;
+                        option.textContent = group.name + (group.creatorId === currentUserId ? " (Benim)" : "");
+                        groupSelect.appendChild(option);
+                    });
+                    showStatus(connectionStatus, `Arama sonuçları yüklendi.`, 'success');
+                    joinSelectedGroupButton.classList.add('hidden');
+                    leaveSelectedGroupButton.classList.add('hidden');
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Grup arama başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Grup arama hatası:', error);
+                showStatus(connectionStatus, 'Grup ararken sunucu hatası.', 'error');
+            }
+        });
+
+        // Grup seçimi değiştiğinde
+        groupSelect.addEventListener('change', async () => {
+            currentGroupId = groupSelect.value;
+            messagesList.innerHTML = '';
+            messageInput.value = '';
+            fileInput.value = '';
+            selectedFileNameSpan.textContent = '';
+
+            messageInput.disabled = !currentGroupId;
+            sendMessageButton.disabled = !currentGroupId;
+            fileInput.disabled = !currentGroupId;
+            fileUploadLabel.style.display = currentGroupId ? 'inline-block' : 'none';
+
+            const selectedGroupOption = groupSelect.options[groupSelect.selectedIndex];
+            const isUserMember = selectedGroupOption && selectedGroupOption.textContent.includes("(Benim)");
+            
+            if (currentGroupId) {
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    await connection.invoke("JoinGroup", currentGroupId);
+                    showStatus(connectionStatus, `Gruba bağlanılıyor: ${selectedGroupOption.text}`, 'success');
+                } else {
+                    showStatus(connectionStatus, 'SignalR bağlantısı hazır değil, gruba katılamadı.', 'error');
+                }
+                await loadGroupMessages(currentGroupId);
+
+                if (isUserMember) {
+                    joinSelectedGroupButton.classList.add('hidden');
+                    leaveSelectedGroupButton.classList.remove('hidden');
+                } else {
+                    joinSelectedGroupButton.classList.remove('hidden');
+                    leaveSelectedGroupButton.classList.add('hidden');
+                }
+            } else {
+                showStatus(connectionStatus, 'Lütfen bir grup seçin.', 'error');
+                joinSelectedGroupButton.classList.add('hidden');
+                leaveSelectedGroupButton.classList.add('hidden');
+            }
+        });
+
+        // Seçili gruba katıl butonu
+        joinSelectedGroupButton.addEventListener('click', async () => {
+            if (!currentGroupId) {
+                showStatus(connectionStatus, 'Lütfen katılmak için bir grup seçin.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:5222/api/group/${currentGroupId}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+                if (response.ok) {
+                    showStatus(connectionStatus, 'Gruba başarıyla katıldınız!', 'success');
+                    await loadUserGroups();
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Gruba katılma başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Gruba katılma hatası:', error);
+                showStatus(connectionStatus, 'Gruba katılırken sunucu hatası.', 'error');
+            }
+        });
+
+        // Seçili gruptan ayrıl butonu
+        leaveSelectedGroupButton.addEventListener('click', async () => {
+            if (!currentGroupId) {
+                showStatus(connectionStatus, 'Lütfen ayrılmak için bir grup seçin.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:5222/api/group/${currentGroupId}/leave`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+                if (response.ok) {
+                    showStatus(connectionStatus, 'Gruptan başarıyla ayrıldınız!', 'success');
+                    await loadUserGroups();
+                    currentGroupId = null;
+                    groupSelect.value = "";
+                    messageInput.disabled = true;
+                    sendMessageButton.disabled = true;
+                    fileInput.disabled = true;
+                    fileUploadLabel.style.display = 'none';
+                    messagesList.innerHTML = '';
+                    joinSelectedGroupButton.classList.add('hidden');
+                    leaveSelectedGroupButton.classList.add('hidden');
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Gruptan ayrılma başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Gruptan ayrılma hatası:', error);
+                showStatus(connectionStatus, 'Gruptan ayrılırken sunucu hatası.', 'error');
+            }
+        });
+
+
+        // Grubun eski mesajlarını yükleme fonksiyonu
+        async function loadGroupMessages(groupId) {
+            if (!jwtToken || !groupId) return;
+
+            try {
+                const response = await fetch(`http://localhost:5222/api/message/group/${groupId}?pageNumber=1&pageSize=50`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const messages = await response.json();
+                    messagesList.innerHTML = '';
+                    messages.forEach(msg => {
+                        addMessageToChat(msg);
+                    });
+                    messagesList.scrollTop = messagesList.scrollHeight;
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Mesajlar yüklenemedi: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Mesajları yükleme hatası:', error);
+                showStatus(connectionStatus, 'Mesajları yüklerken sunucu hatası.', 'error');
+            }
+        }
+
+        // Mesaj arama fonksiyonu
+        searchMessagesButton.addEventListener('click', async () => {
+            const searchTerm = messageSearchTermInput.value.trim();
+            if (!currentGroupId) {
+                showStatus(connectionStatus, 'Lütfen mesaj aramak için bir grup seçin.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:5222/api/message/group/${currentGroupId}/search?searchTerm=${encodeURIComponent(searchTerm)}&pageNumber=1&pageSize=50`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const messages = await response.json();
+                    messagesList.innerHTML = '';
+                    if (messages.length === 0) {
+                        messagesList.innerHTML = '<div class="text-center text-gray-500">Arama sonucunda mesaj bulunamadı.</div>';
+                    } else {
+                        messages.forEach(msg => {
+                            addMessageToChat(msg);
+                        });
+                    }
+                    messagesList.scrollTop = messagesList.scrollHeight;
+                    showStatus(connectionStatus, `Mesaj arama sonuçları yüklendi.`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    showStatus(connectionStatus, `Mesaj arama başarısız: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('Mesaj arama hatası:', error);
+                showStatus(connectionStatus, 'Mesaj ararken sunucu hatası.', 'error');
+            }
+        });
+
+
+        // SignalR bağlantısını başlatma fonksiyonu
+        async function startSignalRConnection() {
+            if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                console.log("SignalR bağlantısı zaten aktif.");
+                return;
+            }
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("http://localhost:5222/chatHub", {
+                    accessTokenFactory: () => jwtToken
+                })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceiveMessage", (message) => {
+                addMessageToChat(message);
+            });
+
+            connection.on("ReceiveMessageError", (error) => {
+                showStatus(connectionStatus, `Mesaj Hatası: ${error}`, 'error');
+            });
+            connection.on("JoinGroupError", (error) => {
+                showStatus(connectionStatus, `Gruba Katılım Hatası: ${error}`, 'error');
+            });
+            connection.on("JoinedGroup", (groupId, message) => {
+                showStatus(connectionStatus, message, 'success');
+            });
+            connection.on("LeftGroup", (groupId, message) => {
+                showStatus(connectionStatus, message, 'success');
+            });
+            connection.on("LeaveGroupError", (error) => {
+                showStatus(connectionStatus, `Gruptan Ayrılma Hatası: ${error}`, 'error');
+            });
+
+
+            try {
+                await connection.start();
+                showStatus(connectionStatus, 'SignalR bağlantısı kuruldu.', 'success');
+                console.log("SignalR bağlantısı başarılı.");
+            } catch (err) {
+                showStatus(connectionStatus, `SignalR bağlantı hatası: ${err}`, 'error');
+                console.error("SignalR bağlantı hatası:", err);
+            }
+        }
+
+        // Mesajı chat listesine ekleme fonksiyonu
+        function addMessageToChat(message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-item');
+
+            const senderName = message.senderUsername || `(${message.senderId.substring(0, 4)}...)`;
+
+            if (message.senderId === currentUserId) {
+                messageElement.classList.add('my-message');
+                messageElement.textContent = `Sen: ${message.content}`;
+            } else {
+                messageElement.classList.add('other-message');
+                messageElement.textContent = `${senderName}: ${message.content}`;
+            }
+
+            if (message.fileUrl && message.fileName) {
+                const fileLink = document.createElement('a');
+                fileLink.href = `http://localhost:5222${message.fileUrl}`; 
+                fileLink.textContent = `Dosya: ${message.fileName}`;
+                fileLink.target = "_blank";
+                fileLink.classList.add('text-blue-600', 'hover:underline', 'block', 'mt-1');
+                messageElement.appendChild(fileLink);
+            }
+
+            messagesList.appendChild(messageElement);
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        // Dosya seçildiğinde dosya adını göster
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                selectedFileNameSpan.textContent = `Seçilen: ${fileInput.files[0].name}`;
+            } else {
+                selectedFileNameSpan.textContent = '';
+            }
+        });
+
+        // Mesaj gönderme butonu olay dinleyicisi
+        sendMessageButton.addEventListener('click', async () => {
+            const content = messageInput.value.trim();
+            const file = fileInput.files[0];
+
+            if (!currentGroupId) {
+                showStatus(connectionStatus, 'Lütfen mesaj göndermek için bir grup seçin.', 'error');
+                return;
+            }
+            if (!content && !file) {
+                showStatus(connectionStatus, 'Mesaj içeriği veya dosya boş olamaz.', 'error');
+                return;
+            }
+            if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                showStatus(connectionStatus, 'SignalR bağlantısı aktif değil.', 'error');
+                return;
+            }
+
+            try {
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('groupId', currentGroupId);
+                    formData.append('content', content);
+                    formData.append('file', file);
+
+                    const response = await fetch('http://localhost:5222/api/message/upload-and-send', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwtToken}`
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const message = await response.json();
+                        // DÜZELTİLDİ: Dosya yüklendikten sonra mesajı chat listesine ekle
+                        addMessageToChat(message); 
+                        showStatus(connectionStatus, 'Dosya ve mesaj başarıyla gönderildi!', 'success');
+                    } else {
+                        const errorText = await response.text();
+                        showStatus(connectionStatus, `Dosya/Mesaj gönderme hatası: ${errorText}`, 'error');
+                    }
+
+                } else {
+                    await connection.invoke("SendMessageToGroup", currentGroupId, content);
+                    showStatus(connectionStatus, 'Mesaj başarıyla gönderildi!', 'success');
+                }
+                
+                messageInput.value = '';
+                fileInput.value = '';
+                selectedFileNameSpan.textContent = '';
+
+            } catch (err) {
+                console.error("Mesaj gönderme hatası:", err);
+                showStatus(connectionStatus, `Mesaj gönderilemedi: ${err}`, 'error');
+            }
+        });
+
+        // Enter tuşu ile mesaj gönderme
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessageButton.click();
+            }
+        });
+        // Mesaj arama kutusuna Enter basıldığında arama yap
+        messageSearchTermInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchMessagesButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

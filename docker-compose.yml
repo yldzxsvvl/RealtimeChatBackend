@@ -1,0 +1,44 @@
+# Docker Compose dosyasının versiyonunu belirtir
+version: '3.8'
+
+# Tanımlanacak servisler (konteynerler)
+services:
+  # Redis servisi
+  redis:
+    image: redis:latest # Kullanılacak Redis imajı
+    container_name: my-redis # Konteynerin adı
+    ports:
+      - "6379:6379" # Host makinenin 6379 portunu konteynerin 6379 portuna eşle
+    volumes:
+      - redis_data:/data # Verilerin kalıcı olması için bir volume bağla
+    restart: always # Konteynerin her zaman yeniden başlamasını sağla
+
+  # ASP.NET Core Backend servisi
+  backend:
+    build:
+      context: . # Dockerfile'ın bulunduğu dizin (projenin kök dizini)
+      dockerfile: Dockerfile # Kullanılacak Dockerfile'ın adı
+    container_name: realtimechat_backend # Konteynerin adı
+    ports:
+      - "5174:5174" # Host makinenin 5174 portunu konteynerin 5174 portuna eşle
+    environment:
+      # Ortam değişkenleri: appsettings.json'daki değerleri geçersiz kılar
+      - ASPNETCORE_URLS=http://+:5174 # Konteyner içinde uygulamanın dinleyeceği URL
+      - ASPNETCORE_ENVIRONMENT=Development # Geliştirme ortamında çalıştır
+      - ConnectionStrings__DefaultConnection=Data Source=/app/chat.db # Veritabanı bağlantı dizesi
+      - JwtSettings__Secret=BuCokGizliBirJwtAnahtaridirVeEnAzOnAltiKarakterOlmalidir # JWT Secret
+      - JwtSettings__Issuer=yourdomain.com # JWT Issuer
+      - JwtSettings__Audience=yourdomain.com # JWT Audience
+      - JwtSettings__ExpiryMinutes=60 # JWT Süresi
+      - FileStorageSettings__UploadsFolder=Uploads # Yükleme klasörü
+      - RedisSettings__ConnectionString=redis:6379 # Redis bağlantı dizesi (servis adı 'redis' olarak ayarlandı)
+    depends_on:
+      - redis # Backend'in Redis'ten sonra başlamasını sağla
+    volumes:
+      - backend_data:/app/wwwroot/Uploads # Yüklenen dosyaların kalıcı olması için volume bağla
+    restart: always # Konteynerin her zaman yeniden başlamasını sağla
+
+# Docker Volume'ları tanımla (verilerin kalıcı olması için)
+volumes:
+  redis_data: {} # Redis verileri için volume
+  backend_data: {} # Backend yüklemeleri için volume
