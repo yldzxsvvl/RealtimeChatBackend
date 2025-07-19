@@ -1,6 +1,9 @@
 Real-Time Chat Backend Servisi
+
 Bu proje, Bluesense Backend Engineer Assignment görevi kapsamında geliştirilmiş, ASP.NET Core tabanlı, ölçeklenebilir ve gerçek zamanlı bir sohbet uygulaması için backend servisidir.
+
 Proje, modern .NET teknolojileri kullanılarak, temiz kod ve sağlam mimari prensipleriyle geliştirilmiştir. Kimlik doğrulama, grup yönetimi, gerçek zamanlı mesajlaşma ve dosya yükleme gibi temel özellikleri içerir. Ayrıca Docker ile konteynerleştirilmiş ve GitHub Actions ile CI/CD otomasyonu sağlanmıştır.
+
 Ana Özellikler (Key Features)
 ●	Auth (Kimlik Doğrulama): JWT tabanlı güvenli kullanıcı kaydı (/register) ve girişi (/login).
 ●	Groups (Gruplar): Herkese açık/özel gruplar oluşturma, gruplara katılma ve ayrılma.
