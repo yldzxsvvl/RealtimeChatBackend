@@ -5,7 +5,7 @@ Bu proje, **Bluesense Backend Engineer Assignment** görevi kapsamında gelişti
 
 Proje, modern .NET teknolojileri kullanılarak, temiz kod ve sağlam mimari prensipleriyle geliştirilmiştir. Kimlik doğrulama, grup yönetimi, gerçek zamanlı mesajlaşma ve dosya yükleme gibi temel özellikleri içerir. Ayrıca Docker ile konteynerleştirilmiş ve GitHub Actions ile CI/CD otomasyonu sağlanmıştır.
 
-## 🔑 Ana Özellikler (Key Features)
+## Ana Özellikler (Key Features)
 
 - **Auth (Kimlik Doğrulama):** JWT tabanlı güvenli kullanıcı kaydı (`/register`) ve girişi (`/login`).
 - **Groups (Gruplar):** Herkese açık/özel gruplar oluşturma, gruplara katılma ve ayrılma.
@@ -13,7 +13,7 @@ Proje, modern .NET teknolojileri kullanılarak, temiz kod ve sağlam mimari pren
 - **Real-time (Gerçek Zamanlı):** SignalR kullanılarak WebSocket üzerinden anlık mesaj güncellemeleri.
 - **Listing & Search (Listeleme ve Arama):** Grup içi mesajlarda ve herkese açık gruplarda arama yapma.
 
-## 🛠 Teknoloji Yığını (Tech Stack)
+## Teknoloji Yığını (Tech Stack)
 
 - **Framework:** ASP.NET Core 8 (Web API)
 - **Veritabanı:** Entity Framework Core & SQLite
@@ -22,7 +22,7 @@ Proje, modern .NET teknolojileri kullanılarak, temiz kod ve sağlam mimari pren
 - **Konteynerleştirme:** Docker & Docker Compose
 - **CI/CD:** GitHub Actions
 
-## 💻 Yerel Kurulum ve Çalıştırma (Local Setup)
+## Yerel Kurulum ve Çalıştırma (Local Setup)
 
 Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin:
 
@@ -43,7 +43,7 @@ dotnet run --project RealtimeChatBackend
 
 Uygulama artık `http://localhost:5222` adresinde çalışıyor olacaktır.
 
-## 🐳 Docker ile Çalıştırma
+## Docker ile Çalıştırma
 
 Docker konteynerleri içinde çalıştırmak için:
 
@@ -53,7 +53,7 @@ docker-compose up --build
 
 > Not: Docker'ın kurulu ve çalışır durumda olması gerekmektedir.
 
-## 🧪 Testler
+## Testler
 
 Birim ve entegrasyon testlerini çalıştırmak için:
 
@@ -61,13 +61,13 @@ Birim ve entegrasyon testlerini çalıştırmak için:
 dotnet test
 ```
 
-## 📘 API Kullanımı ve Dokümantasyonu
+## API Kullanımı ve Dokümantasyonu
 
 Swagger UI: [http://localhost:5222/swagger](http://localhost:5222/swagger)
 
 SignalR Test İstemcisi: [http://localhost:5222/SignalRTestClient.html](http://localhost:5222/SignalRTestClient.html)
 
-## 🧱 Mimari ve Teknik Kararlar
+## Mimari ve Teknik Kararlar
 
 ### Mimari Yapı: Onion Architecture
 
@@ -84,7 +84,7 @@ SignalR Test İstemcisi: [http://localhost:5222/SignalRTestClient.html](http://l
 - **Veritabanı Seçimi:** PostgreSQL yerine SQLite tercih edilmiştir. EF Core sayesinde PostgreSQL'e geçiş kolaydır.
 - **Önbellekleme:** Redis yerine InMemoryCacheService kullanılmıştır. Redis'e geçiş tek satır kodla mümkündür.
 
-## 🔁 CI/CD Pipeline
+## CI/CD Pipeline
 
 GitHub Actions ile CI hattı aşağıdaki adımları içerir:
 
