@@ -55,7 +55,7 @@ docker-compose up -d --build
 
 5. **Reverse Proxy ve SSL:** Nginx veya Caddy ile reverse proxy kurun, Let's Encrypt ile SSL aktif edin.
 
-## 🧪 Testler
+## Testler
 
 ```bash
 dotnet test
